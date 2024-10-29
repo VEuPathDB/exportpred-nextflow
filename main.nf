@@ -23,10 +23,12 @@ else {
 
 workflow {
   exportpred(seqs)
-    | collectFile(name: params.outputFileName, storeDir: params.outputDir)
+  gff = exportpred2gff(exportpred.out)
+  indexResults(gff.collectFile(), params.outputFileName)
 }
 
 process exportpred {
+  container = "veupathdb/exportpred"
 
 input:
     path subsetFasta
@@ -37,5 +39,43 @@ input:
   script:
   """
   exportpred --input $subsetFasta --output exportpred_results
+  """
+}
+
+process exportpred2gff {
+  container = 'bioperl/bioperl:stable'
+
+  input:
+    path subset
+
+  output:
+    path 'exportpred_subset.gff'
+
+  script:
+  """
+  exportpred2gff.pl --inputFile $subset \
+                 --outputFile exportpred_subset.gff
+  """
+
+}
+
+process indexResults {
+  container = 'biocontainers/tabix:v1.9-11-deb_cv1'
+
+  publishDir params.outputDir, mode: 'copy'
+
+  input:
+    path gff
+    val outputFileName
+
+  output:
+    path '*.gz'
+    path '*.gz.tbi'
+
+  script:
+  """
+  sort -k1,1 -k4,4n $gff > ${outputFileName}
+  bgzip ${outputFileName}
+  tabix -p gff ${outputFileName}.gz
   """
 }
