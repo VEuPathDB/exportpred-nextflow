@@ -28,7 +28,7 @@ workflow {
 }
 
 process exportpred {
-  container = "jbrestel/exportpred:latest"
+  container = "veupathdb/exportpred:v1.0.0"
 
 input:
     path subsetFasta
