@@ -43,7 +43,7 @@ input:
 }
 
 process exportpred2gff {
-  container = 'bioperl/bioperl:stable'
+  container 'bioperl/bioperl:stable'
 
   input:
     path subset
@@ -60,7 +60,7 @@ process exportpred2gff {
 }
 
 process indexResults {
-  container = 'biocontainers/tabix:v1.9-11-deb_cv1'
+  container 'biocontainers/tabix:v1.9-11-deb_cv1'
 
   publishDir params.outputDir, mode: 'copy'
 
