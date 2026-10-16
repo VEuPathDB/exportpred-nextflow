@@ -5,30 +5,30 @@ nextflow.enable.dsl=2
 // Param Checking
 //--------------------------------------------------------------------------
 
-if(!params.fastaSubsetSize) {
-  throw new Exception("Missing params.fastaSubsetSize")
-}
-
-if(params.inputFilePath) {
-  seqs = Channel.fromPath( params.inputFilePath )
-           .splitFasta( by:params.fastaSubsetSize, file:true  )
-}
-else {
-  throw new Exception("Missing params.inputFilePath")
-}
-
 //--------------------------------------------------------------------------
 // Main Workflow
 //--------------------------------------------------------------------------
 
 workflow {
+  if(!params.fastaSubsetSize) {
+    error "Missing params.fastaSubsetSize"
+  }
+
+  if(params.inputFilePath) {
+    seqs = channel.fromPath( params.inputFilePath )
+             .splitFasta( by:params.fastaSubsetSize, file:true  )
+  }
+  else {
+    error "Missing params.inputFilePath"
+  }
+
   exportpred(seqs)
   gff = exportpred2gff(exportpred.out)
   indexResults(gff.collectFile(), params.outputFileName)
 }
 
 process exportpred {
-  container = "veupathdb/exportpred:1.0.0"
+  container "veupathdb/exportpred:1.0.0"
 
 input:
     path subsetFasta
